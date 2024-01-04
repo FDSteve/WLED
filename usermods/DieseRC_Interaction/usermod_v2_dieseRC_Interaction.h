@@ -135,7 +135,7 @@ class DieseRCInteractionUsermod : public Usermod {
 
           publishMqtt(String(RelayPinState1).c_str(), true, 1);       
 
-          if (dieseRCPresets[0] != -1)
+          if (dieseRCPresets[0] != 0)
           {
             if (RelayPinState1 == true)
             {
@@ -143,7 +143,7 @@ class DieseRCInteractionUsermod : public Usermod {
             }
             else
             {
-              if (dieseRCPresets[3] == -1)
+              if (dieseRCPresets[3] == 0)
               {
                   //Pin 4 is not used for led light, only MQTT
                   if (RelayPinState2 == false && RelayPinState3 == false)
@@ -166,7 +166,7 @@ class DieseRCInteractionUsermod : public Usermod {
 
           publishMqtt(String(RelayPinState2).c_str(), true, 2);          
 
-          if (dieseRCPresets[1] != -1)
+          if (dieseRCPresets[1] != 0)
           {
             if (RelayPinState2 == true)
             {
@@ -174,7 +174,7 @@ class DieseRCInteractionUsermod : public Usermod {
             }
             else
             {
-              if (dieseRCPresets[3] == -1)
+              if (dieseRCPresets[3] == 0)
               {
                   //Pin 4 is not used for led light, only MQTT
                   if (RelayPinState1 == false && RelayPinState3 == false)
@@ -197,7 +197,7 @@ class DieseRCInteractionUsermod : public Usermod {
 
           publishMqtt(String(RelayPinState3).c_str(), true, 3);          
         
-          if (dieseRCPresets[2] != -1)
+          if (dieseRCPresets[2] != 0)
           {
             if (RelayPinState3 == true)
             {
@@ -205,7 +205,7 @@ class DieseRCInteractionUsermod : public Usermod {
             }
             else
             {
-              if (dieseRCPresets[3] == -1)
+              if (dieseRCPresets[3] == 0)
               {
                   //Pin 4 is not used for led light, only MQTT
                   if (RelayPinState1 == false && RelayPinState2 == false)
@@ -228,7 +228,7 @@ class DieseRCInteractionUsermod : public Usermod {
 
           publishMqtt(String(RelayPinState4).c_str(), true, 4);          
         
-          if (dieseRCPresets[3] != -1)
+          if (dieseRCPresets[3] != 0)
           {
             if (RelayPinState4 == true)
             {
@@ -434,10 +434,10 @@ class DieseRCInteractionUsermod : public Usermod {
       configComplete &= getJsonValue(top["pin"][2], dieseRCPins[2], -1);
       configComplete &= getJsonValue(top["pin"][3], dieseRCPins[3], -1);
 
-      configComplete &= getJsonValue(top["presets"][0], dieseRCPresets[0], -1);
-      configComplete &= getJsonValue(top["presets"][1], dieseRCPresets[1], -1);
-      configComplete &= getJsonValue(top["presets"][2], dieseRCPresets[2], -1);
-      configComplete &= getJsonValue(top["presets"][3], dieseRCPresets[3], -1);
+      configComplete &= getJsonValue(top["presets"][0], dieseRCPresets[0], 0);
+      configComplete &= getJsonValue(top["presets"][1], dieseRCPresets[1], 0);
+      configComplete &= getJsonValue(top["presets"][2], dieseRCPresets[2], 0);
+      configComplete &= getJsonValue(top["presets"][3], dieseRCPresets[3], 0);
       return configComplete;
     }
 
