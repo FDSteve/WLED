@@ -127,13 +127,14 @@ class ESPS01RelayUsermod : public Usermod {
         //Serial.println("I'm alive!");
         lastTime = millis();
 
-        if (currentPreset != bootPreset)
+        if (bri > 1)//currentPreset != bootPreset)
         {
             if (!relaySet)
             {
                 Serial.begin (9600);
 
                 Serial.write(relON, sizeof(relON));
+                Serial.end();
                 relaySet = true;
                 relaySetBootPreset = false;
             }            
@@ -145,6 +146,7 @@ class ESPS01RelayUsermod : public Usermod {
                     Serial.begin (9600);
 
                     Serial.write(relOFF, sizeof(relOFF));
+                    Serial.end();
                     relaySetBootPreset = true;
                     relaySet = false;
                 }
