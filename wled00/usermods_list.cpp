@@ -214,6 +214,7 @@ void registerUsermods()
   //usermods.add(new MyExampleUsermod());
 
   usermods.add(new DieseRCInteractionUsermod());
+  usermods.add(new ESPS01RelayUsermod());
   
   #ifdef USERMOD_BATTERY
   usermods.add(new UsermodBattery());
