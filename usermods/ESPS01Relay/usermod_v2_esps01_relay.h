@@ -219,6 +219,8 @@ class ESPS01RelayUsermod : public Usermod {
      */
     void addToConfig(JsonObject& root)
     {
+      JsonObject top = root.createNestedObject(FPSTR(_name));
+      top[FPSTR(_enabled)] = enabled;
     }
 
 
@@ -245,6 +247,8 @@ class ESPS01RelayUsermod : public Usermod {
       JsonObject top = root[FPSTR(_name)];
 
       bool configComplete = !top.isNull();
+      
+      enabled = top[FPSTR(_enabled)] | enabled;
 
       return configComplete;
     }
