@@ -345,7 +345,7 @@ class ESPS01RelayUsermod : public Usermod {
 
         if (!enabled) return;
       
-        if (currentPreset != 16)
+        if (currentPreset != bootPreset)
         //if (bri > 1)
         {
             Serial.begin (9600);
