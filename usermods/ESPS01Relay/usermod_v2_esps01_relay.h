@@ -32,6 +32,8 @@ class ESPS01RelayUsermod : public Usermod {
 
     byte relON[4] = {0xA0, 0x01, 0x01, 0xA2};
     byte relOFF[4] = {0xA0, 0x01, 0x00, 0xA1};
+    bool relaySet = false;
+    bool relaySetBootPreset = false;
 
     // set your config variables to their boot default value (this can also be done in readFromConfig() or a constructor if you prefer)
     //bool testBool = false;
@@ -125,6 +127,28 @@ class ESPS01RelayUsermod : public Usermod {
         //Serial.println("I'm alive!");
         lastTime = millis();
 
+        if (currentPreset != bootPreset)
+        {
+            if (!relaySet)
+            {
+                Serial.begin (9600);
+
+                Serial.write(relON, sizeof(relON));
+                relaySet = true;
+                relaySetBootPreset = false;
+            }            
+        }
+        else {
+                //bootPreset, no power for LED Strip needed, turn relay off
+                if (!relaySetBootPreset)
+                {
+                    Serial.begin (9600);
+
+                    Serial.write(relOFF, sizeof(relOFF));
+                    relaySetBootPreset = true;
+                    relaySet = false;
+                }
+        }
       }
 
       //String("true").c_str()
@@ -342,21 +366,6 @@ class ESPS01RelayUsermod : public Usermod {
      */
     void onStateChange(uint8_t mode) {
         // do something if WLED state changed (color, brightness, effect, preset, etc)
-
-        if (!enabled) return;
-      
-        if (currentPreset != bootPreset)
-        //if (bri > 1)
-        {
-            Serial.begin (9600);
-
-            Serial.write(relON, sizeof(relON));
-        }
-        else {
-            Serial.begin (9600);
-
-            Serial.write(relOFF, sizeof(relOFF));
-        }
     }
 
 
