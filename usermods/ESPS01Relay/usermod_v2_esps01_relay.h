@@ -338,6 +338,9 @@ class ESPS01RelayUsermod : public Usermod {
      */
     void onStateChange(uint8_t mode) {
         // do something if WLED state changed (color, brightness, effect, preset, etc)
+
+        if (!enabled) return;
+      
         if (currentPreset != 16)
         //if (bri > 1)
         {
