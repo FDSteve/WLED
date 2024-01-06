@@ -139,10 +139,10 @@ class ESPS01RelayUsermod : public Usermod {
             if (!relaySet)
             {
               publishMqtt(String("relay not set").c_str(), true);
-                Serial.begin (9600);
+                Serial.begin(9600);
 
                 Serial.write(relON, sizeof(relON));
-                Serial.end();
+                //Serial.end();
                 relaySet = true;
                 relaySetBootPreset = false;
                 digitalWrite(RELAY,LOW);
@@ -150,15 +150,15 @@ class ESPS01RelayUsermod : public Usermod {
             }            
         }
         else {
-          publishMqtt(String("Bootpreset").c_str(), true);
+                publishMqtt(String("Bootpreset").c_str(), true);
                 //bootPreset, no power for LED Strip needed, turn relay off
                 if (!relaySetBootPreset)
                 {
                   publishMqtt(String("Relay for boot not set").c_str(), true);
-                    Serial.begin (9600);
+                    Serial.begin(9600);
 
                     Serial.write(relOFF, sizeof(relOFF));
-                    Serial.end();
+                    //Serial.end();
                     relaySetBootPreset = true;
                     relaySet = false;
 
