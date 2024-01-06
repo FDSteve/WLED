@@ -127,8 +127,9 @@ class ESPS01RelayUsermod : public Usermod {
         //Serial.println("I'm alive!");
         lastTime = millis();
 
-        publishMqtt(String("ESP").c_str(), true);
-        if (bri > 1)//currentPreset != bootPreset)
+        int actBri = bri;
+        //publishMqtt(String("ESP").c_str(), true);
+        if (actBri > 1)//currentPreset != bootPreset)
         {
             if (!relaySet)
             {
