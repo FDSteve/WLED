@@ -120,7 +120,7 @@ class ESPS01RelayUsermod : public Usermod {
     void loop() {
       // if usermod is disabled or called during strip updating just exit
       // NOTE: on very long strips strip.isUpdating() may always return true so update accordingly
-      if (!enabled || strip.isUpdating()) return;
+      if (!enabled) return;
 
       // do your magic here
       if (millis() - lastTime > 1000) {
@@ -391,3 +391,21 @@ const char ESPS01RelayUsermod::_enabled[] PROGMEM = "enabled";
 
 
 // implementation of non-inline member methods
+void DieseRCInteractionUsermod::publishMqtt(const char* state, bool retain)
+{
+#ifndef WLED_DISABLE_MQTT
+  //Check if MQTT Connected, otherwise it will crash the 8266
+  if (WLED_MQTT_CONNECTED) {
+    char subuf[64];
+    strcpy(subuf, mqttDeviceTopic);
+    
+    strcat_P(subuf, PSTR("/ESPS01Relay/Preset")); 
+ 
+    mqtt->publish(subuf, 0, retain, String(currentPreset).c_str());
+
+    strcat_P(subuf, PSTR("/ESPS01Relay/Brightness")); 
+ 
+    mqtt->publish(subuf, 0, retain, String(bri).c_str());
+  }
+#endif
+}
