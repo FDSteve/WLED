@@ -35,6 +35,8 @@ class ESPS01RelayUsermod : public Usermod {
     bool relaySet = false;
     bool relaySetBootPreset = false;
 
+    #define RELAY 0 // relay connected to GPIO0
+
     // set your config variables to their boot default value (this can also be done in readFromConfig() or a constructor if you prefer)
     //bool testBool = false;
     //unsigned long testULong = 42424242;
@@ -95,6 +97,8 @@ class ESPS01RelayUsermod : public Usermod {
       // do your set-up here
       //Serial.println("Hello from my usermod!");
       initDone = true;
+      pinMode(RELAY,OUTPUT);
+                    
     }
 
 
@@ -141,6 +145,7 @@ class ESPS01RelayUsermod : public Usermod {
                 Serial.end();
                 relaySet = true;
                 relaySetBootPreset = false;
+                digitalWrite(RELAY,LOW);
                 publishMqtt(String("finish relay").c_str(), true);
             }            
         }
@@ -156,6 +161,8 @@ class ESPS01RelayUsermod : public Usermod {
                     Serial.end();
                     relaySetBootPreset = true;
                     relaySet = false;
+
+                    digitalWrite(RELAY,HIGH);
                     publishMqtt(String("finish boot relay").c_str(), true);
                 }
         }
