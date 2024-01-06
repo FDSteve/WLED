@@ -51,7 +51,7 @@ class ESPS01RelayUsermod : public Usermod {
 
 
     // any private methods should go here (non-inline methosd should be defined out of class)
-    void publishMqtt(const char* state, bool retain = false, int relayNumber = 0); // example for publishing MQTT message
+    void publishMqtt(const char* state, bool retain = false); // example for publishing MQTT message
 
 
   public:
@@ -391,7 +391,7 @@ const char ESPS01RelayUsermod::_enabled[] PROGMEM = "enabled";
 
 
 // implementation of non-inline member methods
-void DieseRCInteractionUsermod::publishMqtt(const char* state, bool retain)
+void ESPS01RelayUsermod::publishMqtt(const char* state, bool retain)
 {
 #ifndef WLED_DISABLE_MQTT
   //Check if MQTT Connected, otherwise it will crash the 8266
