@@ -131,26 +131,32 @@ class ESPS01RelayUsermod : public Usermod {
         //publishMqtt(String("ESP").c_str(), true);
         if (actBri > 1)//currentPreset != bootPreset)
         {
+            publishMqtt(String("BRI greater 1").c_str(), true);
             if (!relaySet)
             {
+              publishMqtt(String("relay not set").c_str(), true);
                 Serial.begin (9600);
 
                 Serial.write(relON, sizeof(relON));
                 Serial.end();
                 relaySet = true;
                 relaySetBootPreset = false;
+                publishMqtt(String("finish relay").c_str(), true);
             }            
         }
         else {
+          publishMqtt(String("Bootpreset").c_str(), true);
                 //bootPreset, no power for LED Strip needed, turn relay off
                 if (!relaySetBootPreset)
                 {
+                  publishMqtt(String("Relay for boot not set").c_str(), true);
                     Serial.begin (9600);
 
                     Serial.write(relOFF, sizeof(relOFF));
                     Serial.end();
                     relaySetBootPreset = true;
                     relaySet = false;
+                    publishMqtt(String("finish boot relay").c_str(), true);
                 }
         }
       }
@@ -401,10 +407,16 @@ void ESPS01RelayUsermod::publishMqtt(const char* state, bool retain)
     char subuf[64];
     strcpy(subuf, mqttDeviceTopic);
     
+    strcat_P(subuf, PSTR("/ESPS01Relay")); 
+ 
+    mqtt->publish(subuf, 0, retain, String(state).c_str());
+    
+    strcpy(subuf, mqttDeviceTopic);
     strcat_P(subuf, PSTR("/ESPS01Relay/Preset")); 
  
     mqtt->publish(subuf, 0, retain, String(currentPreset).c_str());
-
+    
+    strcpy(subuf, mqttDeviceTopic);
     strcat_P(subuf, PSTR("/ESPS01Relay/Brightness")); 
  
     mqtt->publish(subuf, 0, retain, String(bri).c_str());
