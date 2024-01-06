@@ -135,26 +135,25 @@ class ESPS01RelayUsermod : public Usermod {
         //publishMqtt(String("ESP").c_str(), true);
         if (actBri > 1)//currentPreset != bootPreset)
         {
-            publishMqtt(String("BRI greater 1").c_str(), true);
+            //publishMqtt(String("BRI greater 1").c_str(), true);
             if (!relaySet)
             {
-              publishMqtt(String("relay not set").c_str(), true);
+                //publishMqtt(String("relay not set").c_str(), true);
                 Serial.begin(9600);
 
                 Serial.write(relON, sizeof(relON));
                 //Serial.end();
                 relaySet = true;
                 relaySetBootPreset = false;
-                digitalWrite(RELAY,LOW);
-                publishMqtt(String("finish relay").c_str(), true);
+                //publishMqtt(String("finish relay").c_str(), true);
             }            
         }
         else {
-                publishMqtt(String("Bootpreset").c_str(), true);
+                //publishMqtt(String("Bootpreset").c_str(), true);
                 //bootPreset, no power for LED Strip needed, turn relay off
                 if (!relaySetBootPreset)
                 {
-                  publishMqtt(String("Relay for boot not set").c_str(), true);
+                    //publishMqtt(String("Relay for boot not set").c_str(), true);
                     Serial.begin(9600);
 
                     Serial.write(relOFF, sizeof(relOFF));
@@ -162,8 +161,7 @@ class ESPS01RelayUsermod : public Usermod {
                     relaySetBootPreset = true;
                     relaySet = false;
 
-                    digitalWrite(RELAY,HIGH);
-                    publishMqtt(String("finish boot relay").c_str(), true);
+                    //publishMqtt(String("finish boot relay").c_str(), true);
                 }
         }
       }
