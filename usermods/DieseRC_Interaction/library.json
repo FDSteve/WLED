@@ -1,0 +1,5 @@
+{
+  "name": "DieseRC_Interaction",
+  "build": { "libArchive": false },
+  "dependencies": {}
+}

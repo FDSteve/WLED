@@ -1,0 +1,5 @@
+{
+  "name": "ESPS01Relay",
+  "build": { "libArchive": false },
+  "dependencies": {}
+}
