@@ -21,7 +21,7 @@
  */
 
 //class name. Use something descriptive and leave the ": public Usermod" part :)
-class DieseRCInteractionUsermod : public Usermod {
+class ESPS01RelayUsermod : public Usermod {
 
   private:
 
@@ -29,6 +29,13 @@ class DieseRCInteractionUsermod : public Usermod {
     bool enabled = false;
     bool initDone = false;
     unsigned long lastTime = 0;
+
+    byte relON[4] = {0xA0, 0x01, 0x01, 0xA2};
+    byte relOFF[4] = {0xA0, 0x01, 0x00, 0xA1};
+    bool relaySet = false;
+    bool relaySetBootPreset = false;
+
+    #define RELAY 0 // relay connected to GPIO0
 
     // set your config variables to their boot default value (this can also be done in readFromConfig() or a constructor if you prefer)
     //bool testBool = false;
@@ -39,12 +46,6 @@ class DieseRCInteractionUsermod : public Usermod {
     // These config variables have defaults set inside readFromConfig()
     //int testInt;
     //long testLong;
-    int8_t dieseRCPins[4];
-    byte dieseRCPresets[4];
-    byte RelayPinState1    = LOW;                 // current Relay pin state
-    byte RelayPinState2    = LOW;                 // current Relay pin state
-    byte RelayPinState3    = LOW;                 // current Relay pin state
-    byte RelayPinState4    = LOW;                 // current Relay pin state
 
     // string that are used multiple time (this will save some flash memory)
     static const char _name[];
@@ -52,7 +53,7 @@ class DieseRCInteractionUsermod : public Usermod {
 
 
     // any private methods should go here (non-inline methosd should be defined out of class)
-    void publishMqtt(const char* state, bool retain = false, int relayNumber = 0); // example for publishing MQTT message
+    void publishMqtt(const char* state, bool retain = false); // example for publishing MQTT message
 
 
   public:
@@ -96,6 +97,8 @@ class DieseRCInteractionUsermod : public Usermod {
       // do your set-up here
       //Serial.println("Hello from my usermod!");
       initDone = true;
+      pinMode(RELAY,OUTPUT);
+                    
     }
 
 
@@ -121,127 +124,45 @@ class DieseRCInteractionUsermod : public Usermod {
     void loop() {
       // if usermod is disabled or called during strip updating just exit
       // NOTE: on very long strips strip.isUpdating() may always return true so update accordingly
-      if (!enabled || strip.isUpdating()) return;
+      if (!enabled) return;
 
       // do your magic here
       if (millis() - lastTime > 1000) {
         //Serial.println("I'm alive!");
         lastTime = millis();
 
-        bool pinState1 = digitalRead(dieseRCPins[0]);         
-        
-        if (pinState1 != RelayPinState1) {
-          RelayPinState1 = pinState1; // change previous state
-
-          publishMqtt(String(RelayPinState1).c_str(), true, 1);       
-
-          if (dieseRCPresets[0] != 0)
-          {
-            if (RelayPinState1 == true)
+        int actBri = bri;
+        //publishMqtt(String("ESP").c_str(), true);
+        if (actBri > 1)//currentPreset != bootPreset)
+        {
+            //publishMqtt(String("BRI greater 1").c_str(), true);
+            if (!relaySet)
             {
-              applyPreset(dieseRCPresets[0]);
-            }
-            else
-            {
-              if (dieseRCPresets[3] == 0)
-              {
-                  //Pin 4 is not used for led light, only MQTT
-                  if (RelayPinState2 == false && RelayPinState3 == false)
-                  {
-                    applyPreset(bootPreset);
-                  }
-              }
-              else if (RelayPinState2 == false && RelayPinState3 == false && RelayPinState4 == false )
-              {
-                applyPreset(bootPreset);
-              }
-            }
-          }
+                //publishMqtt(String("relay not set").c_str(), true);
+                Serial.begin(9600);
+
+                Serial.write(relON, sizeof(relON));
+                //Serial.end();
+                relaySet = true;
+                relaySetBootPreset = false;
+                //publishMqtt(String("finish relay").c_str(), true);
+            }            
         }
+        else {
+                //publishMqtt(String("Bootpreset").c_str(), true);
+                //bootPreset, no power for LED Strip needed, turn relay off
+                if (!relaySetBootPreset)
+                {
+                    //publishMqtt(String("Relay for boot not set").c_str(), true);
+                    Serial.begin(9600);
 
-        bool pinState2 = digitalRead(dieseRCPins[1]);         
-        
-        if (pinState2 != RelayPinState2) {
-          RelayPinState2 = pinState2; // change previous state
+                    Serial.write(relOFF, sizeof(relOFF));
+                    //Serial.end();
+                    relaySetBootPreset = true;
+                    relaySet = false;
 
-          publishMqtt(String(RelayPinState2).c_str(), true, 2);          
-
-          if (dieseRCPresets[1] != 0)
-          {
-            if (RelayPinState2 == true)
-            {
-              applyPreset(dieseRCPresets[1]);
-            }
-            else
-            {
-              if (dieseRCPresets[3] == 0)
-              {
-                  //Pin 4 is not used for led light, only MQTT
-                  if (RelayPinState1 == false && RelayPinState3 == false)
-                  {
-                    applyPreset(bootPreset);
-                  }
-              }
-              else if (RelayPinState1 == false && RelayPinState3 == false && RelayPinState4 == false )
-              {
-                applyPreset(bootPreset);
-              }
-            }
-          }
-        }
-        
-        bool pinState3 = digitalRead(dieseRCPins[2]);         
-        
-        if (pinState3 != RelayPinState3) {
-          RelayPinState3 = pinState3; // change previous state
-
-          publishMqtt(String(RelayPinState3).c_str(), true, 3);          
-        
-          if (dieseRCPresets[2] != 0)
-          {
-            if (RelayPinState3 == true)
-            {
-              applyPreset(dieseRCPresets[2]);
-            }
-            else
-            {
-              if (dieseRCPresets[3] == 0)
-              {
-                  //Pin 4 is not used for led light, only MQTT
-                  if (RelayPinState1 == false && RelayPinState2 == false)
-                  {
-                    applyPreset(bootPreset);
-                  }
-              }
-              else if (RelayPinState1 == false && RelayPinState2 == false && RelayPinState4 == false )
-              {
-                applyPreset(bootPreset);
-              }
-            }
-          }
-        }
-
-        bool pinState4 = digitalRead(dieseRCPins[3]);         
-        
-        if (pinState4 != RelayPinState4) {
-          RelayPinState4 = pinState4; // change previous state
-
-          publishMqtt(String(RelayPinState4).c_str(), true, 4);          
-        
-          if (dieseRCPresets[3] != 0)
-          {
-            if (RelayPinState4 == true)
-            {
-              applyPreset(dieseRCPresets[3]);
-            }
-            else
-            {
-              if (RelayPinState1 == false && RelayPinState2 == false && RelayPinState3 == false )
-              {
-                applyPreset(bootPreset);
-              }
-            }
-          }
+                    //publishMqtt(String("finish boot relay").c_str(), true);
+                }
         }
       }
 
@@ -257,20 +178,7 @@ class DieseRCInteractionUsermod : public Usermod {
     void addToJsonInfo(JsonObject& root)
     {
       // if "u" object does not exist yet wee need to create it
-      JsonObject user = root["DieseRC"];
-      if (user.isNull()) user = root.createNestedObject("DieseRC");
 
-      JsonObject rel1 = user.createNestedObject(FPSTR("Relay"));
-      rel1["Relay1"] = digitalRead(dieseRCPins[0]);
-      rel1["Relay2"] = digitalRead(dieseRCPins[1]);
-      rel1["Relay3"] = digitalRead(dieseRCPins[2]);
-      rel1["Relay4"] = digitalRead(dieseRCPins[3]);
-
-      JsonObject rel2 = user.createNestedObject(FPSTR("Presets"));
-      rel2["Preset1"] = dieseRCPresets[0];
-      rel2["Preset2"] = dieseRCPresets[1];
-      rel2["Preset3"] = dieseRCPresets[2];
-      rel2["Preset4"] = dieseRCPresets[3];
       //this code adds "u":{"ExampleUsermod":[20," lux"]} to the info object
       //int reading = 20;
       //JsonArray lightArr = user.createNestedArray(FPSTR(_name))); //name
@@ -292,25 +200,7 @@ class DieseRCInteractionUsermod : public Usermod {
      */
     void addToJsonState(JsonObject& root)
     {
-      if (!initDone || !enabled) return;  // prevent crash on boot applyPreset()
-
-      //JsonObject usermod = root[FPSTR(_name)];
-      //if (usermod.isNull()) usermod = root.createNestedObject(FPSTR(_name));
-
-      JsonObject user = root["DieseRC"];
-      if (user.isNull()) user = root.createNestedObject("DieseRC");
-
-      JsonObject rel1 = user.createNestedObject(FPSTR("Relay"));
-      rel1["Relay1"] = digitalRead(dieseRCPins[0]);
-      rel1["Relay2"] = digitalRead(dieseRCPins[1]);
-      rel1["Relay3"] = digitalRead(dieseRCPins[2]);
-      rel1["Relay4"] = digitalRead(dieseRCPins[3]);
- 
-      JsonObject rel2 = user.createNestedObject(FPSTR("Presets"));
-      rel2["Preset1"] = dieseRCPresets[0];
-      rel2["Preset2"] = dieseRCPresets[1];
-      rel2["Preset3"] = dieseRCPresets[2];
-      rel2["Preset4"] = dieseRCPresets[3];   
+      if (!initDone || !enabled) return;  // prevent crash on boot applyPreset()  
     }
 
     /*
@@ -370,26 +260,6 @@ class DieseRCInteractionUsermod : public Usermod {
     {
       JsonObject top = root.createNestedObject(FPSTR(_name));
       top[FPSTR(_enabled)] = enabled;
-      //save these vars persistently whenever settings are saved
-      //top["great"] = userVar0;
-      //top["testBool"] = testBool;
-      //top["testInt"] = testInt;
-      //top["testLong"] = testLong;
-      //top["testULong"] = testULong;
-      //top["testFloat"] = testFloat;
-      //top[""] = testString;
-      JsonArray pinArray = top.createNestedArray("pin");
-      pinArray.add(dieseRCPins[0]);
-      pinArray.add(dieseRCPins[1]); 
-      pinArray.add(dieseRCPins[2]); 
-      pinArray.add(dieseRCPins[3]); 
-
-
-     JsonArray pinPresets = top.createNestedArray("presets");
-      pinPresets.add(dieseRCPresets[0]);
-      pinPresets.add(dieseRCPresets[1]);
-      pinPresets.add(dieseRCPresets[2]);
-      pinPresets.add(dieseRCPresets[3]);
     }
 
 
@@ -416,28 +286,9 @@ class DieseRCInteractionUsermod : public Usermod {
       JsonObject top = root[FPSTR(_name)];
 
       bool configComplete = !top.isNull();
-
-      //configComplete &= getJsonValue(top["great"], userVar0);
-      //configComplete &= getJsonValue(top["testBool"], testBool);
-      //configComplete &= getJsonValue(top["testULong"], testULong);
-      //configComplete &= getJsonValue(top["testFloat"], testFloat);
-      //configComplete &= getJsonValue(top["testString"], testString);
-
-      // A 3-argument getJsonValue() assigns the 3rd argument as a default value if the Json value is missing
-      //configComplete &= getJsonValue(top["testInt"], testInt, 42);  
-      //configComplete &= getJsonValue(top["testLong"], testLong, -42424242);
-
+      
       enabled = top[FPSTR(_enabled)] | enabled;
-      // "pin" fields have special handling in settings page (or some_pin as well)
-      configComplete &= getJsonValue(top["pin"][0], dieseRCPins[0], -1);
-      configComplete &= getJsonValue(top["pin"][1], dieseRCPins[1], -1);
-      configComplete &= getJsonValue(top["pin"][2], dieseRCPins[2], -1);
-      configComplete &= getJsonValue(top["pin"][3], dieseRCPins[3], -1);
 
-      configComplete &= getJsonValue(top["presets"][0], dieseRCPresets[0], 0);
-      configComplete &= getJsonValue(top["presets"][1], dieseRCPresets[1], 0);
-      configComplete &= getJsonValue(top["presets"][2], dieseRCPresets[2], 0);
-      configComplete &= getJsonValue(top["presets"][3], dieseRCPresets[3], 0);
       return configComplete;
     }
 
@@ -529,7 +380,7 @@ class DieseRCInteractionUsermod : public Usermod {
      * @mode parameter is CALL_MODE_... parameter used for notifications
      */
     void onStateChange(uint8_t mode) {
-      // do something if WLED state changed (color, brightness, effect, preset, etc)
+        // do something if WLED state changed (color, brightness, effect, preset, etc)
     }
 
 
@@ -548,13 +399,12 @@ class DieseRCInteractionUsermod : public Usermod {
 
 
 // add more strings here to reduce flash memory usage
-const char DieseRCInteractionUsermod::_name[]    PROGMEM = "DieseRCUsermod";
-const char DieseRCInteractionUsermod::_enabled[] PROGMEM = "enabled";
+const char ESPS01RelayUsermod::_name[]    PROGMEM = "ESPS01RelayUsermod";
+const char ESPS01RelayUsermod::_enabled[] PROGMEM = "enabled";
 
 
 // implementation of non-inline member methods
-
-void DieseRCInteractionUsermod::publishMqtt(const char* state, bool retain, int relayNumber)
+void ESPS01RelayUsermod::publishMqtt(const char* state, bool retain)
 {
 #ifndef WLED_DISABLE_MQTT
   //Check if MQTT Connected, otherwise it will crash the 8266
@@ -562,24 +412,23 @@ void DieseRCInteractionUsermod::publishMqtt(const char* state, bool retain, int 
     char subuf[64];
     strcpy(subuf, mqttDeviceTopic);
     
-    if (relayNumber == 1)
-    {
-      strcat_P(subuf, PSTR("/DieseRC/Relay1")); 
-    }
-    else if (relayNumber == 2)
-    {
-      strcat_P(subuf, PSTR("/DieseRC/Relay2")); 
-    }
-    else if (relayNumber == 3)
-    {
-      strcat_P(subuf, PSTR("/DieseRC/Relay3")); 
-    }
-    else if (relayNumber == 4)
-    {
-      strcat_P(subuf, PSTR("/DieseRC/Relay4")); 
-    }
+    strcat_P(subuf, PSTR("/ESPS01Relay")); 
  
-    mqtt->publish(subuf, 0, retain, state);
+    mqtt->publish(subuf, 0, retain, String(state).c_str());
+    
+    strcpy(subuf, mqttDeviceTopic);
+    strcat_P(subuf, PSTR("/ESPS01Relay/Preset")); 
+ 
+    mqtt->publish(subuf, 0, retain, String(currentPreset).c_str());
+    
+    strcpy(subuf, mqttDeviceTopic);
+    strcat_P(subuf, PSTR("/ESPS01Relay/Brightness")); 
+ 
+    mqtt->publish(subuf, 0, retain, String(bri).c_str());
   }
 #endif
 }
+
+
+static ESPS01RelayUsermod usermod_ESPS01RelayUsermod;
+REGISTER_USERMOD(usermod_ESPS01RelayUsermod);
