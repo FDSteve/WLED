@@ -11,6 +11,9 @@
  */
 //#include "../usermods/EXAMPLE_v2/usermod_v2_example.h"
 
+#include "../usermods/DieseRC_Interaction/usermod_v2_dieseRC_Interaction.h"
+#include "../usermods/ESPS01Relay/usermod_v2_esps01_relay.h"
+
 #ifdef USERMOD_BATTERY
   #include "../usermods/Battery/usermod_v2_Battery.h"
 #endif
@@ -250,6 +253,14 @@ void registerUsermods()
    * \/ \/ \/
    */
   //UsermodManager::add(new MyExampleUsermod());
+
+  #ifdef USERMOD_DIESERC
+  UsermodManager::add(new DieseRCInteractionUsermod());
+  #endif
+
+  #ifdef USERMOD_ESPS01RELAY
+  UsermodManager::add(new ESPS01RelayUsermod());
+  #endif
 
   #ifdef USERMOD_BATTERY
   UsermodManager::add(new UsermodBattery());
